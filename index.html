@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script type="text/javascript">
+            $(function() {
+                window.WebSocket = window.WebSocket || window.MozWebSocket;
+                var websocket = new WebSocket('ws://10.0.0.122:3000');
+                websocket.onopen = function () {
+                    $('h1').css('color', 'green').html("Server Live");
+                };
+                websocket.onerror = function () {
+                    $('h1').css('color', 'red').html("Server Down");;
+                };
+                websocket.onmessage = function (message) {
+                    console.log(message.data);
+                    var values = message.data.split(',');
+                    jQuery.each(values,function(i,val){
+                            alert(val);
+                        var item = val.split(' ');
+                        $('input:radio[name = '+item[0]+']')[item[1]].checked = true; 
+                    });
+                };
+                
+                $('.command').on('change',function(e) {
+                    websocket.send($(this).attr('name')+" "+$(this).attr('value'));
+                });
+                $("#up").click(function(){websocket.send("up")});
+                $("#down").click(function(){websocket.send("down")});
+                    
+            });
+        </script>
+        </head>
+    <body>
+        <h1>Server</h1>
+        <form>
+		Lamp:
+            <input class ="command" type="radio" name="Lamp" value="On"/> On
+	    <input class ="command" type="radio" name="Lamp" value="Off"/> Off
+<br/>
+		Fan:
+            <input class ="command" type="radio" name="Fan" value="On"/> On
+	    <input class ="command" type="radio" name="Fan" value="Off"/> Off
+Speed:
+	    <input class ="command" type="radio" name="High" value="On"/> High
+	    <input class ="command" type="radio" name="High" value="Off"/> Low
+<br/>
+		Iron:
+            <input class ="command" type="radio" name="Iron" value="On" /> On
+	    <input class ="command" type="radio" name="Iron" value="Off"/> Off
+<br/>
+        </form>
+
+        Volume:
+        <button id="up">+</button>
+        <button id="down">-</button>
+        <div></div>
+    </body>
+</html>
