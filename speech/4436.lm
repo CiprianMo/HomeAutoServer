@@ -1,0 +1,75 @@
+Language model created by QuickLM on Thu Sep 28 15:47:31 EDT 2017
+Copyright (c) 1996-2010 Carnegie Mellon University and Alexander I. Rudnicky
+
+The model is in standard ARPA format, designed by Doug Paul while he was at MITRE.
+
+The code that was used to produce this language model is available in Open Source.
+Please visit http://www.speech.cs.cmu.edu/tools/ for more information
+
+The (fixed) discount mass is 0.5. The backoffs are computed using the ratio method.
+This model based on a corpus of 10 sentences and 12 words
+
+\data\
+ngram 1=12
+ngram 2=20
+ngram 3=20
+
+\1-grams:
+-0.9031 </s> -0.3010
+-0.9031 <s> -0.2430
+-1.9031 DOWN -0.2430
+-1.3010 FAN -0.2553
+-1.9031 HIGH -0.2430
+-1.6021 IRON -0.2672
+-1.6021 LAMP -0.2672
+-1.9031 LOW -0.2430
+-1.4260 OFF -0.2430
+-1.4260 ON -0.2430
+-1.9031 UP -0.2430
+-1.6021 VOLUME -0.2900
+
+\2-grams:
+-0.6990 <s> FAN 0.0000
+-1.0000 <s> IRON 0.0000
+-1.0000 <s> LAMP 0.0000
+-1.0000 <s> VOLUME 0.0000
+-0.3010 DOWN </s> -0.3010
+-0.9031 FAN HIGH 0.0000
+-0.9031 FAN LOW 0.0000
+-0.9031 FAN OFF 0.0000
+-0.9031 FAN ON 0.0000
+-0.3010 HIGH </s> -0.3010
+-0.6021 IRON OFF 0.0000
+-0.6021 IRON ON 0.0000
+-0.6021 LAMP OFF 0.0000
+-0.6021 LAMP ON 0.0000
+-0.3010 LOW </s> -0.3010
+-0.3010 OFF </s> -0.3010
+-0.3010 ON </s> -0.3010
+-0.3010 UP </s> -0.3010
+-0.6021 VOLUME DOWN 0.0000
+-0.6021 VOLUME UP 0.0000
+
+\3-grams:
+-0.9031 <s> FAN HIGH
+-0.9031 <s> FAN LOW
+-0.9031 <s> FAN OFF
+-0.9031 <s> FAN ON
+-0.6021 <s> IRON OFF
+-0.6021 <s> IRON ON
+-0.6021 <s> LAMP OFF
+-0.6021 <s> LAMP ON
+-0.6021 <s> VOLUME DOWN
+-0.6021 <s> VOLUME UP
+-0.3010 FAN HIGH </s>
+-0.3010 FAN LOW </s>
+-0.3010 FAN OFF </s>
+-0.3010 FAN ON </s>
+-0.3010 IRON OFF </s>
+-0.3010 IRON ON </s>
+-0.3010 LAMP OFF </s>
+-0.3010 LAMP ON </s>
+-0.3010 VOLUME DOWN </s>
+-0.3010 VOLUME UP </s>
+
+\end\
