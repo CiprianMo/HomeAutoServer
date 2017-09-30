@@ -63,6 +63,7 @@ int main()
         h.onHttpRequest([](uWS::HttpResponse *res, uWS::HttpRequest req, char *data,size_t length, size_t remainingBytes)
                         {
                             cout << "Requesting "<<req.getUrl().toString()<<endl;
+                            });
                             uWS::Header url = req.getUrl();
                             auto buffer = getRequestFile(url.toString());
                             res->end(&buffer[0],buffer.size());
