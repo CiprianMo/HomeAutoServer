@@ -6,7 +6,8 @@ Speech::Speech(const std::string& ModelDir)
 {
         config =cmd_ln_init(NULL, ps_args(), TRUE,
                         "-hmm","/usr/local/share/pocketsphinx/model/en-us/en-us",
-                        "-lm","4436.lm",
+                   //     "-lm","4436.lm",
+                        "-kws","keywords.kws",
                         "-dict","4436.dic",
                         "-logfn","/dev/null",
                         NULL);
@@ -45,9 +46,14 @@ while(1)
     {
             ps_end_utt(ps);
             ad_stop_rec(ad);
-            hyp = ps_get_hyp(ps,NULL);
-            
-            return hyp;
+            if(ps_get_hyp(ps,NULL))
+            {
+               std::string data(ps_get_hyp(ps,NULL)); 
+
+                std::cout <<"Sgins is "<<data<<std::endl;
+               return data;
+            }                        
+            return "";
             break;
     }
 }
