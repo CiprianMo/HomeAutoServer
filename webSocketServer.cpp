@@ -46,57 +46,8 @@ string getRequestFile(string fileName)
          throw(errno);
 
 }
-int main(int argc, char *argv[])
-{
-        uWS::Hub h;
 
-    h.onMessage([](uWS::WebSocket<uWS::SERVER> *ws, char *message, size_t length, uWS::OpCode opCode) {
-                    std::cout <<std::string(message,length);             
-        ws->send(message, length, opCode);
-    });
-
-    h.onError([](int port) {
-        switch (port) {
-        case 80:
-            std::cout << "Server emits error listening to port 80 (permission denied)" << std::endl;
-            break;
-        case 3000:
-            std::cout << "Server emits error listening to port 3000 twice" << std::endl;
-            break;
-        default:
-            std::cout << "FAILURE: port " << port << " should not emit error" << std::endl;
-            exit(-1);
-        }
-    });
-
-    h.onConnection([](uWS::WebSocket<uWS::CLIENT> *ws, uWS::HttpRequest req) {
-        switch ((long) ws->getUserData()) {
-        case 8:
-            std::cout << "Client established a remote connection over non-SSL" << std::endl;
-            ws->close(1000);
-            break;
-        case 9:
-            std::cout << "Client established a remote connection over SSL" << std::endl;
-            ws->close(1000);
-            break;
-        default:
-            std::cout << "FAILURE: " << ws->getUserData() << " should not connect!" << std::endl;
-            exit(-1);
-        }
-    });
-
-
-    h.listen(80);
-    if (h.listen(3000)) {
-        std::cout << "Server listens to port 3000" << std::endl;
-        h.run();
-    }
-    h.listen(3000);
-    h.getDefaultGroup<uWS::SERVER>().close();
-    h.run();
-std::cout << "Server falls through after group closes" << std::endl;
-}
-int madin()
+int main()
 {
         if(!bcm2835_init()) return 1;
         uWS::Hub h;
