@@ -6,7 +6,7 @@
         <script type="text/javascript">
             $(function() {
                 window.WebSocket = window.WebSocket || window.MozWebSocket;
-                var websocket = new WebSocket('ws://localhost:3000',
+                var websocket = new WebSocket('ws://10.0.0.122:3000',
                                               'dumb-increment-protocol');
                 websocket.onopen = function () {
                     $('h1').css('color', 'green').html("Server Live");
