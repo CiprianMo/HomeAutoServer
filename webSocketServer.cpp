@@ -7,6 +7,8 @@
 #include<curl/curl.h>
 using namespace std;
 
+CURL *curl;
+CURLcode res;
 enum class Pin : std::uint8_t
 {
         lamp = 21,
@@ -21,15 +23,34 @@ struct Command
         char* operation;
 };
 
+size_t write_data(char* data, size_t size, size_t nmemb, std::string* str) {
+        if(!str)
+        {
+                return 0;
+        }
+        str->append(data, size*nmemb); 
+        return size * nmemb;
+}
+
+void GetUpdates()
+{
+        std::cout <<"Getting updates"<<std::endl;
+        std::string buffer;
+        curl_easy_setopt(curl,CURLOPT_URL,"10.0.0.68/R");
+        curl_easy_setopt(curl,CURLOPT_WRITEDATA,&buffer);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+        res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+        std::cout << "CURL: " <<buffer<<std::endl;
+        
+}
+
 void get_pin_status(string& status)
 {
-        auto fan = bcm2835_gpio_lev((uint8_t)Pin::fan);
-        auto lamp = bcm2835_gpio_lev((uint8_t)Pin::lamp);
-        auto high = bcm2835_gpio_lev((uint8_t)Pin::high);
-        auto iron = bcm2835_gpio_lev((uint8_t)Pin::iron);
-        ostringstream stringStream;
-        stringStream << "Fan "<<unsigned(fan)<<",Lamp "<<unsigned(lamp)<<",High "<<unsigned(high)<<",Iron "<<unsigned(iron);
-        status=stringStream.str();
+        //ostringstream stringStream;
+        //stringStream << "Fan "<<unsigned(fan)<<",Lamp "<<unsigned(lamp)<<",High "<<unsigned(high)<<",Iron "<<unsigned(iron);
+        status="To be a string ";
 }
 
 void getRequestFile(string fileName,std::string& fileContent, std::string& urlParameters)
@@ -46,7 +67,12 @@ void getRequestFile(string fileName,std::string& fileContent, std::string& urlPa
         else
         {
                 fname = dt.substr(1,dt.find("?")-1);
-                urlParameters = dt.substr(dt.find("?")+6);        
+                std::cout <<dt<<std::endl;
+                if(dt.find(" the ") != std::string::npos)
+                {
+                        urlParameters = dt.substr(dt.find("?")+6);
+                }else
+                        urlParameters = dt.substr(dt.find("?")+1);        
                 std::cout <<"url params: "<<urlParameters<<std::endl;              
         }
         ifstream file(fname,ios::in| ios::binary);
@@ -58,14 +84,19 @@ void getRequestFile(string fileName,std::string& fileContent, std::string& urlPa
                  file.close();
                  fileContent= ss.str();
          } 
-
 }
 
 int main()
 {
-        if(!bcm2835_init()) return 1;
         uWS::Hub h;
+        
+        
+
+        curl = curl_easy_init();
+
+        if(!curl) return 1;
         std::string urlParameters = "";
+
         h.onConnection([](uWS::WebSocket<uWS::SERVER> *ws, uWS::HttpRequest req)
                         {
                             cout << "Connected to a client" << endl;
@@ -88,6 +119,7 @@ int main()
                         if(message != NULL)
                         {
                             string data(message);
+                            GetUpdates();
                             cout << "The message is "<<data.substr(0,length) <<endl;
                             }
                         });
