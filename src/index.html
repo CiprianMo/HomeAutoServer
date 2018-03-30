@@ -10,22 +10,21 @@
                                               'dumb-increment-protocol');
                 websocket.onopen = function () {
                     $('h1').css('color', 'green').html("Server Live");
-                    websocket.send("update");
                 };
                 websocket.onerror = function () {
                     $('h1').css('color', 'red').html("Server Down");;
                 };
                 websocket.onmessage = function (message) {
                     console.log(message.data);
-                    var values = message.data.split(',');
+                    var values = message.data.split(' ');
                     jQuery.each(values,function(i,val){
-                        var item = val.split(' ');
-                        $('input:radio[name = '+item[0]+']')[item[1]].checked = true; 
+                        var item = val.split('=');
+                        $('input[name = '+item[0]+'][value='+item[1]+"]").attr('checked',true); 
                     });
                 };
                 
                 $('.command').on('change',function(e) {
-                    websocket.send($(this).attr('name')+" "+$(this).attr('value'));
+                    websocket.send($(this).attr('name')+"="+$(this).attr('value'));
                 });
                 $("#up").click(function(){websocket.send("up")});
                 $("#down").click(function(){websocket.send("down")});

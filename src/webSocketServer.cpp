@@ -9,12 +9,11 @@ using namespace std;
 
 CURL *curl;
 CURLcode res;
-enum class Pin : std::uint8_t
-{
-        lamp = 21,
-        fan = 20,
-        high = 26,
-        iron = 19
+std::map<std::string, u_int8_t> Pin ={
+       {"lamp", 5},
+        {"fan", 21},
+        {"high", 4},
+        {"iron", 19},
 };
 
 struct Command 
@@ -32,18 +31,43 @@ size_t write_data(char* data, size_t size, size_t nmemb, std::string* str) {
         return size * nmemb;
 }
 
-void GetUpdates()
+void GetUpdates(string& status)
 {
+        curl = curl_easy_init();
         std::cout <<"Getting updates"<<std::endl;
+        std::string result;
         std::string buffer;
-        curl_easy_setopt(curl,CURLOPT_URL,"10.0.0.68/R");
-        curl_easy_setopt(curl,CURLOPT_WRITEDATA,&buffer);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-        res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
 
-        std::cout << "CURL: " <<buffer<<std::endl;
-        
+        for(std::map<std::string,u_int8_t>::iterator it = Pin.begin(); it != Pin.end(); ++it)
+        {
+                //std::string pin = std::string(it->second);
+                std::string url = "10.0.0.68/?U"+std::to_string(it->second);
+                curl_easy_setopt(curl,CURLOPT_URL,url.c_str());
+                curl_easy_setopt(curl,CURLOPT_WRITEDATA,&buffer); 
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+                res = curl_easy_perform(curl);  
+                result +=it->first+"="+buffer+" ";
+                buffer.clear();
+        }        
+
+        curl_easy_cleanup(curl);
+        status = result;
+}
+
+void send_command(const std::string& command)
+{
+        //curl = curl_easy_init();
+        std::string pin = command.substr(0,command.find("="));
+        std::string cmd = command.substr(command.find("=")+1);
+        int pinInt = Pin[pin];
+        std::string buffer="10.0.0.68/?S"+std::to_string(pinInt)+"="+cmd;
+        curl = curl_easy_init();
+        if(curl) 
+        {
+                curl_easy_setopt(curl, CURLOPT_URL, buffer.c_str());
+                res = curl_easy_perform(curl);
+        }
+        curl_easy_cleanup(curl);
 }
 
 void get_pin_status(string& status)
@@ -52,6 +76,8 @@ void get_pin_status(string& status)
         //stringStream << "Fan "<<unsigned(fan)<<",Lamp "<<unsigned(lamp)<<",High "<<unsigned(high)<<",Iron "<<unsigned(iron);
         status="To be a string ";
 }
+
+
 
 void getRequestFile(string fileName,std::string& fileContent, std::string& urlParameters)
 {
@@ -62,11 +88,11 @@ void getRequestFile(string fileName,std::string& fileContent, std::string& urlPa
         std::string fname;
         if(dt=="/")
         {
-            fname="index.html";
+            fname="src/index.html";
         }
         else
         {
-                fname = dt.substr(1,dt.find("?")-1);
+                fname = "src/"+dt.substr(1,dt.find("?")-1);
                 std::cout <<dt<<std::endl;
                 if(dt.find(" the ") != std::string::npos)
                 {
@@ -89,20 +115,15 @@ void getRequestFile(string fileName,std::string& fileContent, std::string& urlPa
 int main()
 {
         uWS::Hub h;
-        
-        
 
-        curl = curl_easy_init();
-
-        if(!curl) return 1;
         std::string urlParameters = "";
 
         h.onConnection([](uWS::WebSocket<uWS::SERVER> *ws, uWS::HttpRequest req)
                         {
                             cout << "Connected to a client" << endl;
                             string status ="";
-                            get_pin_status(status);
-                            cout << "the string is "<<status.size()<<" "<<status<<endl;
+                            GetUpdates(status);
+                            cout << "the string is "<<status<<endl;
                             ws->send(status.c_str(),status.size(),uWS::OpCode::TEXT); 
                             });
         h.onHttpRequest([&](uWS::HttpResponse *res, uWS::HttpRequest req, char *data,size_t length, size_t remainingBytes)
@@ -112,6 +133,10 @@ int main()
                             uWS::Header url = req.getUrl();
                             std::string buffer = "";
                             getRequestFile(url.toString(),buffer,urlParameters);
+                            if(urlParameters!="")
+                            {
+                                    send_command(urlParameters);
+                            }
                             res->end(&buffer[0],buffer.size());
                             });
         h.onMessage([](uWS::WebSocket<uWS::SERVER> *ws, char *message, size_t length, uWS::OpCode opCode)
@@ -119,13 +144,21 @@ int main()
                         if(message != NULL)
                         {
                             string data(message);
-                            GetUpdates();
-                            cout << "The message is "<<data.substr(0,length) <<endl;
+                            if(data.substr(0,length)=="update"){
+                                    std::string updates;
+                                    GetUpdates(updates);
+                            }
+                            else{
+                                    cout << "The message is "<<data.substr(0,length) <<endl;
+                            send_command(data.substr(0,length));
+                            }
+                            
                             }
                         });
 
       if(h.listen(3000)){
             h.run(); 
         }
+        return 0;
 }
 
